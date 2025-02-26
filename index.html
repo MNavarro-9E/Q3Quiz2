@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz 2 : Ticketing Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- EmailJS for working email ;) credits to YouTube and ChatGPT for teaching me!!-->
+    <!-- The emailjs script was enhanced and fixed by ChatGPT, because I couldn't figure out how to fix it at first :) -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <img src="header_1.jpg" class="header-img">
+        <div class="overlay-text">Tyler the Creator Chromakopia World Tour Tickets</div>
+    </header>
+    
+    <div class="container text-center mt-5 p-4 rounded border">
+        <h1 class="mb-4 text-success">Ticketing Center !<i>!</i></h1>
+        
+        <div class="row">
+            <!-- personal info !! -->
+            <div class="col-md-4 p-3 border rounded bg-light">
+                <button class="btn btn-success w-100" onclick="toggleSection('personal-info')">Personal Information . . .</button>
+                <div id="personal-info" class="toggle-section mt-3">
+                    <label class="mt-2">Full Name</label>
+                    <input type="text" id="fullname" class="form-control mb-3" oninput="capitalizeFirstLetter()">
+                    
+                    <label>Email</label>
+                    <input type="email" id="email" class="form-control mb-3">
+
+                    <button class="btn btn-success w-100" onclick="submitInfo()">Submit Info</button>
+                    <p id="email-status" class="mt-2"></p>
+                </div>
+            </div>
+
+            <!-- pricesss ang taas... -->
+            <div class="col-md-4 p-3 border rounded bg-light">
+                <button class="btn btn-success w-100" onclick="toggleSection('ticket-price')">Ticket Price . . .</button>
+                <div id="ticket-price" class="toggle-section mt-3">
+                    <label>Choose Your Seat</label>
+                    <select id="seat" class="form-select mb-3" onchange="calculatePrice()">
+                        <option value="" selected disabled>Select a seat</option>
+                        <option value="1500">General Admission</option>
+                        <option value="2450">Patron</option>
+                        <option value="4500">Balcony</option>
+                        <option value="7500">VIP</option>
+                        <option value="9500">Box Seats</option>
+                    </select>
+
+                    <label>Choose Category</label>
+                    <select id="category" class="form-select mb-3" onchange="calculatePrice()">
+                        <option value="" selected disabled>Select a category</option>
+                        <option value="0">Regular</option>
+                        <option value="-350">Member</option>
+                        <option value="-200">Student</option>
+                        <option value="-250">Senior Citizen</option>
+                    </select>
+
+                    <button class="btn btn-success w-100" onclick="showPrice()">Check Price . . .</button>
+                    <p id="price-message" class="mt-3 fw-bold"></p>
+                </div>
+            </div>
+
+            <!-- ticket print thingy -->
+            <div class="col-md-4 p-3 border rounded bg-light">
+                <button class="btn btn-success w-100" onclick="toggleSection('print-ticket')">Print Ticket . . .</button>
+                <div id="print-ticket" class="toggle-section mt-3">
+                    <img src="ticket.png" alt="Cinema Ticket" class="img-fluid mb-3">
+                    <button class="btn btn-success w-100" onclick="printTicket()">Print Ticket</button>
+                    <button class="btn btn-success w-100 mt-2" onclick="window.location.reload()">Buy More Tickets</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-4 text-muted">© Maria Sofia Giana L. Navarro || 9-Emerald</footer>
+    </div>
+
+    <!-- js -->
+    <script>
+    emailjs.init("4z3DkrPH0JLkX8eSr"); 
+    function submitInfo() {
+        let name = document.getElementById("fullname").value;
+        let email = document.getElementById("email").value
+        if (name.trim() !=="" && email.trim() !== "") {
+            alert("Hello, " + name + "! Please go to the next step.");
+        } else {
+            alert("Please fill in the blank fields");
+        }
+    }
+    function toggleSection(sectionId) {
+        let section = document.getElementById(sectionId);
+        if (section.style.display === "none" || section.style.display === "") {
+            section.style.display = "block";
+        } else {
+            section.style.display = "none";
+        }
+    }
+
+    function capitalizeFirstLetter() {
+        let input = document.getElementById("fullname");
+        input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+    }
+
+    function calculatePrice() {
+        let seat = document.getElementById("seat").value;
+        let category = document.getElementById("category").value;
+        let message = document.getElementById("price-message");
+
+        if (!seat || !category) {
+            message.innerHTML = "Please select both a seat and a category.";
+            return null;
+        }
+
+        let price = parseInt(seat) + parseInt(category);
+        message.innerHTML = "Total Ticket Price: " + price + " pesos";
+        return price;
+    }
+
+    function showPrice() {
+        let price = calculatePrice();
+        if (price) {
+            alert("Your Ticket Price: " + price + " pesos");
+        }
+    }
+
+    function printTicket() {
+        let name = document.getElementById("fullname").value;
+        let email = document.getElementById("email").value;
+        let seat = document.getElementById("seat").selectedOptions[0].text;
+        let category = document.getElementById("category").selectedOptions[0].text;
+        let price = calculatePrice();
+
+        if (name.trim() === "" || email.trim() === "" || !price) {
+            alert("Please fill out all fields and select a ticket before printing.");
+            return;
+        }
+
+        emailjs.send("service_m5dc84b", "template_72lc8hv", {
+            to_name: name,
+            email: email,
+            seat: seat,
+            category: category,
+            price: price
+        }).then(function (response) {
+            alert("Ticket email sent successfully! You may print your ticket.");
+            window.print();
+        }, function (error) {
+            alert("email failed to send :(");
+        });
+    }
+
+    </script>
+
+</body>
+</html>
